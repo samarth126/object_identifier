@@ -1,0 +1,143 @@
+
+
+{% load static %}
+
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Educating AI</title>
+
+        <!-- CSS FILES -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+        <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100;300;400;600;700&display=swap" rel="stylesheet">
+
+        <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+
+        <link href="{% static 'bootstrap-icons.css' %}" rel="stylesheet">
+
+        <link href="{% static 'owl.carousel.min.css' %}" rel="stylesheet">
+
+        <link href="{% static 'owl.theme.default.min.css' %}" rel="stylesheet">
+
+        <link href="{% static 'tooplate-gotto-job.css' %}" rel="stylesheet">
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    
+    <body id="top">
+
+ 
+
+        <main>
+            <section class="hero-section d-flex justify-content-center align-items-center">
+                <div class="section-overlay"></div>
+
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div id="video-container">
+                                <video id="video-element" autoplay></video>
+                            </div>
+                          
+                            <br>
+                        <div class="text-center">
+                            <button class="custom-btn custom-border-btn btn" id="capture-button">Capture Image</button>
+                        </div>
+                        </div>
+                        <div class="col-md-5">
+
+                            <h6 class="text-white">The new age of Learning !!  {{ x }}</h6>
+                            
+                            <div id="prediction-container">
+                                <h3>Class Name: <span id="class-name"></span></h3>
+                                <h3>Confidence Score: <span id="confidence-score"></span>%</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+            
+            
+            
+            </section>
+
+
+        </main>
+
+     
+
+        <script>
+            
+            // Access the webcam video stream
+            const videoElement = document.getElementById('video-element');
+    
+            // Check browser compatibility
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    videoElement.srcObject = stream;
+                })
+                .catch(error => {
+                    console.error('Error accessing the webcam:', error);
+                });
+    
+            // Capture image button click event
+            const captureButton = document.getElementById('capture-button');
+            captureButton.addEventListener('click', () => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+    
+                // Set canvas dimensions to match video stream
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+    
+                // Draw current video frame onto the canvas
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    
+                // Convert canvas image data to base64
+                const imageDataURL = canvas.toDataURL('image/png');
+    
+                // Get the CSRF token from the page's cookie
+                const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1];
+                // Send captured image to server for processing
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'cap_helper' %}",
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    data: {
+                        image: imageDataURL
+                    },
+                    dataType: 'json',
+                    
+                    success: function (data) {
+                        console.log('Server response:', data);
+                        // Handle the server response here, e.g., display a success message
+                        // ...
+                       
+                         // Update the class name and confidence score on the page
+                        $('#class-name').text(data.class_name);
+                        $('#confidence-score').text(data.confidence_score);
+                  
+
+                    },
+                    error: function (xhr, textStatus, error) {
+                        console.error('Error capturing image:', error);
+                    }
+                });
+            });
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,8 @@
+0 lcd module
+1 led light
+2 capacitor_60_micro_farad
+3 RAM Memory 1GB X 2 E186014 94V-0
+4 VGA cable
+5 JBL headphones
+6 Metzenbaum scissors
+7 Testtube
